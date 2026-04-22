@@ -1,0 +1,82 @@
+version: 2
+
+models:
+  - name: dim_product
+    description: "Tabla dimensión de productos: un registro por item_id único con atributos descriptivos y segmento de precio"
+    columns:
+      - name: product_key
+        description: "Surrogate key: md5(item_id)"
+        tests:
+          - unique
+          - not_null
+      - name: item_id
+        description: "Código natural del producto (ej: FDW58)"
+        tests:
+          - unique
+          - not_null
+      - name: item_category
+        description: "Categoría del producto (ej: Dairy, Fruits and Vegetables, Snack Foods)"
+        tests:
+          - not_null
+      - name: fat_content
+        description: "Contenido de grasa: Low Fat | Regular"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Low Fat', 'Regular']
+      - name: item_weight_kg
+        description: "Peso del ítem en kg"
+      - name: item_mrp
+        description: "Precio máximo de venta sugerido"
+        tests:
+          - not_null
+      - name: price_tier
+        description: "Segmento de precio calculado: Budget (<70) | Mid-Range (70–140) | Premium (>140)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Budget', 'Mid-Range', 'Premium']
+
+  - name: dim_outlet
+    description: "Tabla dimensión de puntos de venta: un registro por outlet_id único con atributos operativos"
+    columns:
+      - name: outlet_key
+        description: "Surrogate key: md5(outlet_id)"
+        tests:
+          - unique
+          - not_null
+      - name: outlet_id
+        description: "Código natural del outlet (ej: OUT049)"
+        tests:
+          - unique
+          - not_null
+      - name: outlet_type
+        description: "Tipo de outlet: Grocery Store | Supermarket Type1/2/3"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Grocery Store', 'Supermarket Type1', 'Supermarket Type2', 'Supermarket Type3']
+      - name: outlet_size
+        description: "Tamaño del outlet: Small | Medium | High | N/A"
+      - name: outlet_tier
+        description: "Categoría geográfica: Tier 1 | Tier 2 | Tier 3"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Tier 1', 'Tier 2', 'Tier 3']
+      - name: outlet_year_opened
+        description: "Año de apertura del outlet"
+        tests:
+          - not_null
+      - name: outlet_age_years
+        description: "Años de operación al momento de correr el modelo"
+        tests:
+          - not_null
+      - name: outlet_type_rank
+        description: "Ranking ordinal del tipo de outlet (1=Grocery, 4=Supermarket Type3)"
+        tests:
+          - not_null
