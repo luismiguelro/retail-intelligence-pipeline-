@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_sales
+    description: "Vista de staging sobre clean_sales: columnas renombradas, tipos casteados y outlet_age_years calculado"
+    columns:
+      - name: item_id
+        description: "Código único del producto"
+      - name: outlet_id
+        description: "Código único del punto de venta"
+      - name: item_category
+        description: "Categoría del producto (ej: Dairy, Fruits and Vegetables)"
+      - name: fat_content
+        description: "Contenido de grasa: Low Fat | Regular"
+      - name: item_weight_kg
+        description: "Peso del ítem en kg, redondeado a 3 decimales"
+      - name: item_shelf_fraction
+        description: "Fracción del espacio en góndola asignado al ítem (0–1)"
+      - name: item_mrp
+        description: "Precio máximo de venta sugerido, redondeado a 2 decimales"
+      - name: outlet_type
+        description: "Tipo de outlet: Grocery Store | Supermarket Type1/2/3"
+      - name: outlet_size
+        description: "Tamaño del outlet: Small | Medium | High | N/A"
+      - name: outlet_tier
+        description: "Categoría geográfica: Tier 1 | Tier 2 | Tier 3"
+      - name: outlet_year_opened
+        description: "Año de apertura del outlet"
+      - name: outlet_age_years
+        description: "Años de operación del outlet al momento de correr el modelo"

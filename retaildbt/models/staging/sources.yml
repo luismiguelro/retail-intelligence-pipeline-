@@ -1,0 +1,33 @@
+version: 2
+
+sources:
+  - name: public
+    database: postgres
+    schema: public
+    description: "Tablas cargadas por el pipeline de ingesta Python"
+    tables:
+      - name: clean_sales
+        description: "Datos de ventas Blinkit limpios (imputación de nulos, normalización de fat_content)"
+        columns:
+          - name: item_identifier
+            description: "Código único del producto (ej: FDW58)"
+          - name: item_weight
+            description: "Peso del ítem en kg; nulos imputados con mediana por item_type"
+          - name: item_fat_content
+            description: "Contenido de grasa: Low Fat | Regular"
+          - name: item_visibility
+            description: "Fracción del espacio en góndola asignado al ítem (0–1); ceros imputados con media por item_type"
+          - name: item_type
+            description: "Categoría del producto (ej: Dairy, Snack Foods, Fruits and Vegetables)"
+          - name: item_mrp
+            description: "Precio máximo de venta sugerido (Maximum Retail Price)"
+          - name: outlet_identifier
+            description: "Código único del punto de venta (ej: OUT049)"
+          - name: outlet_establishment_year
+            description: "Año de apertura del outlet"
+          - name: outlet_size
+            description: "Tamaño del outlet: Small | Medium | High | N/A"
+          - name: outlet_location_type
+            description: "Categoría geográfica del outlet: Tier 1 | Tier 2 | Tier 3"
+          - name: outlet_type
+            description: "Tipo de outlet: Grocery Store | Supermarket Type1/2/3"
