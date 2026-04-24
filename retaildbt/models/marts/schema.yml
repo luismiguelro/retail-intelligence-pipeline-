@@ -80,3 +80,66 @@ models:
         description: "Ranking ordinal del tipo de outlet (1=Grocery, 4=Supermarket Type3)"
         tests:
           - not_null
+
+  - name: fact_sales
+    description: "Tabla de hechos: un registro por combinación ítem × outlet con métricas de precio y visibilidad en góndola"
+    columns:
+      - name: fact_key
+        description: "Surrogate key: md5(item_id|outlet_id)"
+        tests:
+          - unique
+          - not_null
+      - name: product_key
+        description: "FK a dim_product"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: product_key
+      - name: outlet_key
+        description: "FK a dim_outlet"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_outlet')
+                field: outlet_key
+      - name: item_id
+        description: "Código natural del producto"
+        tests:
+          - not_null
+      - name: outlet_id
+        description: "Código natural del outlet"
+        tests:
+          - not_null
+      - name: price_tier
+        description: "Segmento de precio: Budget | Mid-Range | Premium"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Budget', 'Mid-Range', 'Premium']
+      - name: outlet_type_rank
+        description: "Ranking ordinal del tipo de outlet (1–4)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+      - name: item_mrp
+        description: "Precio máximo de venta sugerido"
+        tests:
+          - not_null
+      - name: item_shelf_fraction
+        description: "Fracción del espacio en góndola (0–1)"
+        tests:
+          - not_null
+      - name: item_weight_kg
+        description: "Peso del ítem en kg"
+        tests:
+          - not_null
+      - name: weighted_revenue_potential
+        description: "item_mrp × item_shelf_fraction — potencial de ingreso ponderado por visibilidad"
+        tests:
+          - not_null

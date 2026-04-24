@@ -6,25 +6,58 @@ models:
     columns:
       - name: item_id
         description: "Código único del producto"
+        tests:
+          - not_null
       - name: outlet_id
         description: "Código único del punto de venta"
+        tests:
+          - not_null
       - name: item_category
         description: "Categoría del producto (ej: Dairy, Fruits and Vegetables)"
+        tests:
+          - not_null
       - name: fat_content
         description: "Contenido de grasa: Low Fat | Regular"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Low Fat', 'Regular']
       - name: item_weight_kg
         description: "Peso del ítem en kg, redondeado a 3 decimales"
+        tests:
+          - not_null
       - name: item_shelf_fraction
         description: "Fracción del espacio en góndola asignado al ítem (0–1)"
+        tests:
+          - not_null
       - name: item_mrp
         description: "Precio máximo de venta sugerido, redondeado a 2 decimales"
+        tests:
+          - not_null
       - name: outlet_type
         description: "Tipo de outlet: Grocery Store | Supermarket Type1/2/3"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Grocery Store', 'Supermarket Type1', 'Supermarket Type2', 'Supermarket Type3']
       - name: outlet_size
         description: "Tamaño del outlet: Small | Medium | High | N/A"
+        tests:
+          - not_null
       - name: outlet_tier
         description: "Categoría geográfica: Tier 1 | Tier 2 | Tier 3"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Tier 1', 'Tier 2', 'Tier 3']
       - name: outlet_year_opened
         description: "Año de apertura del outlet"
+        tests:
+          - not_null
       - name: outlet_age_years
         description: "Años de operación del outlet al momento de correr el modelo"
+        tests:
+          - not_null
