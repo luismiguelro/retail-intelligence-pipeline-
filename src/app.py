@@ -1,11 +1,11 @@
 import os
 from pathlib import Path
-import psycopg2
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
@@ -95,20 +95,20 @@ OUTLET_COLORS = {
 
 
 # ── Conexión ──────────────────────────────────────────────────────────────────
-def get_connection():
+@st.cache_resource
+def get_engine():
     url = os.getenv("DATABASE_URL", "")
     url = url.replace("aws-1-us-east-1.pooler.supabase.com", "18.213.155.45")
+    url = url.replace("postgresql://", "postgresql+psycopg2://")
     sep = "&" if "?" in url else "?"
     url += f"{sep}sslmode=require"
-    conn = psycopg2.connect(url)
-    conn.autocommit = True
-    return conn
+    return create_engine(url)
 
 
 # ── Queries ───────────────────────────────────────────────────────────────────
 @st.cache_data(ttl=300)
 def load_executive_kpis():
-    conn = get_connection()
+    engine = get_engine()
     q = """
         SELECT
             COUNT(DISTINCT f.item_id)                                               AS total_skus,
@@ -120,12 +120,12 @@ def load_executive_kpis():
         FROM public_marts.fact_sales f
         JOIN public_marts.dim_product p ON p.product_key = f.product_key
     """
-    return pd.read_sql(q, conn).iloc[0]
+    return pd.read_sql(text(q), engine).iloc[0]
 
 
 @st.cache_data(ttl=300)
 def load_price_tier_breakdown():
-    conn = get_connection()
+    engine = get_engine()
     q = """
         SELECT
             price_tier,
@@ -136,12 +136,12 @@ def load_price_tier_breakdown():
         GROUP BY price_tier
         ORDER BY CASE price_tier WHEN 'Budget' THEN 1 WHEN 'Mid-Range' THEN 2 ELSE 3 END
     """
-    return pd.read_sql(q, conn)
+    return pd.read_sql(text(q), engine)
 
 
 @st.cache_data(ttl=300)
 def load_shelf_by_category():
-    conn = get_connection()
+    engine = get_engine()
     q = """
         SELECT
             p.item_category,
@@ -154,12 +154,12 @@ def load_shelf_by_category():
         GROUP BY p.item_category
         ORDER BY avg_shelf DESC
     """
-    return pd.read_sql(q, conn)
+    return pd.read_sql(text(q), engine)
 
 
 @st.cache_data(ttl=300)
 def load_shelf_scatter():
-    conn = get_connection()
+    engine = get_engine()
     q = """
         SELECT
             p.item_category,
@@ -170,12 +170,12 @@ def load_shelf_scatter():
         JOIN public_marts.dim_product p ON p.product_key = f.product_key
         GROUP BY p.item_category, f.item_mrp, f.price_tier
     """
-    return pd.read_sql(q, conn)
+    return pd.read_sql(text(q), engine)
 
 
 @st.cache_data(ttl=300)
 def load_outlet_profile():
-    conn = get_connection()
+    engine = get_engine()
     q = """
         SELECT
             o.outlet_type,
@@ -190,12 +190,12 @@ def load_outlet_profile():
         GROUP BY o.outlet_type, o.outlet_tier, o.outlet_size
         ORDER BY total_potential DESC
     """
-    return pd.read_sql(q, conn)
+    return pd.read_sql(text(q), engine)
 
 
 @st.cache_data(ttl=300)
 def load_revenue_by_category():
-    conn = get_connection()
+    engine = get_engine()
     q = """
         SELECT
             p.item_category,
@@ -206,12 +206,12 @@ def load_revenue_by_category():
         GROUP BY p.item_category, f.price_tier
         ORDER BY total_potential DESC
     """
-    return pd.read_sql(q, conn)
+    return pd.read_sql(text(q), engine)
 
 
 @st.cache_data(ttl=300)
 def load_tier_by_outlet():
-    conn = get_connection()
+    engine = get_engine()
     q = """
         SELECT
             o.outlet_tier,
@@ -222,7 +222,7 @@ def load_tier_by_outlet():
         GROUP BY o.outlet_tier, f.price_tier
         ORDER BY o.outlet_tier, f.price_tier
     """
-    return pd.read_sql(q, conn)
+    return pd.read_sql(text(q), engine)
 
 
 # ── Carga datos ───────────────────────────────────────────────────────────────
@@ -370,7 +370,7 @@ with tab1:
         )
         fig_pie.update_traces(textposition="inside", textinfo="percent+label")
         fig_pie.update_layout(showlegend=False, margin=dict(t=10, b=10))
-        st.plotly_chart(fig_pie, use_container_width=True)
+        st.plotly_chart(fig_pie, width='stretch')
         st.caption(
             "🟢 **Económico** — precio < $70 &nbsp;|&nbsp; "
             "🟡 **Intermedio** — $70–$140 &nbsp;|&nbsp; "
@@ -391,7 +391,7 @@ with tab1:
         )
         fig_tier_bar.update_traces(texttemplate="$%{text:,.0f}", textposition="outside")
         fig_tier_bar.update_layout(showlegend=False, margin=dict(t=30, b=10))
-        st.plotly_chart(fig_tier_bar, use_container_width=True)
+        st.plotly_chart(fig_tier_bar, width='stretch')
 
     top_tier   = tiers.loc[tiers["revenue_potential"].idxmax()]
     budget_row = tiers[tiers["price_tier"] == "Budget"]
@@ -443,7 +443,7 @@ with tab2:
             },
         )
         fig_scatter_outlet.update_layout(margin=dict(t=10, b=10))
-        st.plotly_chart(fig_scatter_outlet, use_container_width=True)
+        st.plotly_chart(fig_scatter_outlet, width='stretch')
 
     with col_b:
         st.subheader("¿Qué tipo de tienda tiene más potencial de ventas?")
@@ -461,7 +461,7 @@ with tab2:
         )
         fig_outlet_h.update_traces(texttemplate="$%{text:,.0f}", textposition="outside")
         fig_outlet_h.update_layout(showlegend=False, margin=dict(t=10, b=10))
-        st.plotly_chart(fig_outlet_h, use_container_width=True)
+        st.plotly_chart(fig_outlet_h, width='stretch')
 
     st.subheader("¿Cómo se mezclan los segmentos de precio en cada nivel de ciudad?")
     st.caption(
@@ -490,7 +490,7 @@ with tab2:
         legend_title="Segmento de precio",
         margin=dict(t=10, b=10),
     )
-    st.plotly_chart(fig_stacked, use_container_width=True)
+    st.plotly_chart(fig_stacked, width='stretch')
 
     best = outlets.loc[outlets["total_potential"].idxmax()]
     st.success(
@@ -532,7 +532,7 @@ with tab3:
         )
         fig_shelf.update_traces(texttemplate="%{text:.3f}", textposition="outside")
         fig_shelf.update_layout(coloraxis_showscale=False, margin=dict(t=10, b=10))
-        st.plotly_chart(fig_shelf, use_container_width=True)
+        st.plotly_chart(fig_shelf, width='stretch')
 
     with col_d:
         st.subheader("¿Los productos más caros están mejor posicionados?")
@@ -553,7 +553,7 @@ with tab3:
             },
         )
         fig_scat2.update_layout(margin=dict(t=10, b=10))
-        st.plotly_chart(fig_scat2, use_container_width=True)
+        st.plotly_chart(fig_scat2, width='stretch')
 
     top_shelf = shelf_cat.loc[shelf_cat["avg_shelf"].idxmax(), "item_category"]
     low_shelf = shelf_cat.loc[shelf_cat["avg_shelf"].idxmin(), "item_category"]
@@ -598,7 +598,7 @@ with tab4:
         )
         fig_top_cat.update_traces(texttemplate="$%{text:,.0f}", textposition="outside")
         fig_top_cat.update_layout(coloraxis_showscale=False, margin=dict(t=10, b=10))
-        st.plotly_chart(fig_top_cat, use_container_width=True)
+        st.plotly_chart(fig_top_cat, width='stretch')
 
     with col_f:
         st.subheader("¿De qué segmento viene ese potencial?")
@@ -621,7 +621,7 @@ with tab4:
             },
         )
         fig_comp.update_layout(xaxis_tickangle=-35, margin=dict(t=10, b=90))
-        st.plotly_chart(fig_comp, use_container_width=True)
+        st.plotly_chart(fig_comp, width='stretch')
 
     st.subheader("Eficiencia: ¿cuánto potencial genera cada producto dentro de su categoría?")
     st.caption(
@@ -651,7 +651,7 @@ with tab4:
     )
     fig_bubble.update_traces(textposition="top center")
     fig_bubble.update_layout(coloraxis_showscale=True, margin=dict(t=10, b=10))
-    st.plotly_chart(fig_bubble, use_container_width=True)
+    st.plotly_chart(fig_bubble, width='stretch')
 
     top_cat = cat_full.loc[cat_full["total_potential"].idxmax(), "item_category"]
     top_eff = cat_full.loc[cat_full["efficiency"].idxmax(), "item_category"]
