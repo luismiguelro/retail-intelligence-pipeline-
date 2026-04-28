@@ -7,7 +7,7 @@ import streamlit as st
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 
-load_dotenv(Path(__file__).parent.parent / ".env")
+load_dotenv(Path(__file__).parent.parent / ".env")  # solo actúa en local; en Cloud usa st.secrets
 
 st.set_page_config(
     page_title="Retail Intelligence | Blinkit Analytics",
@@ -97,7 +97,11 @@ OUTLET_COLORS = {
 # ── Conexión ──────────────────────────────────────────────────────────────────
 @st.cache_resource
 def get_engine():
-    url = os.getenv("DATABASE_URL", "")
+    # Streamlit Cloud provee secrets via st.secrets; local usa .env
+    try:
+        url = st.secrets["DATABASE_URL"]
+    except Exception:
+        url = os.getenv("DATABASE_URL", "")
     url = url.replace("aws-1-us-east-1.pooler.supabase.com", "18.213.155.45")
     url = url.replace("postgresql://", "postgresql+psycopg2://")
     sep = "&" if "?" in url else "?"

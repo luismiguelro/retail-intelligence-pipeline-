@@ -137,3 +137,4 @@ if __name__ == "__main__":
 #     executemany    → ~8523 round-trips → ~4 min
 #     execute_values →     4 round-trips → ~5 seg
 # =============================================================================
+

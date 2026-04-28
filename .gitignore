@@ -3,8 +3,11 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+venv_dbt/
 dist/
 .DS_Store
 data/raw/
 data/processed/
 *.ipynb_checkpoints/
+logs/
+.claude/
