@@ -110,7 +110,7 @@ def get_engine():
 
 
 # ── Queries ───────────────────────────────────────────────────────────────────
-@st.cache_data(ttl=300)
+@st.cache_data
 def load_executive_kpis():
     engine = get_engine()
     q = """
@@ -127,7 +127,7 @@ def load_executive_kpis():
     return pd.read_sql(text(q), engine).iloc[0]
 
 
-@st.cache_data(ttl=300)
+@st.cache_data
 def load_price_tier_breakdown():
     engine = get_engine()
     q = """
@@ -143,7 +143,7 @@ def load_price_tier_breakdown():
     return pd.read_sql(text(q), engine)
 
 
-@st.cache_data(ttl=300)
+@st.cache_data
 def load_shelf_by_category():
     engine = get_engine()
     q = """
@@ -161,7 +161,7 @@ def load_shelf_by_category():
     return pd.read_sql(text(q), engine)
 
 
-@st.cache_data(ttl=300)
+@st.cache_data
 def load_shelf_scatter():
     engine = get_engine()
     q = """
@@ -177,7 +177,7 @@ def load_shelf_scatter():
     return pd.read_sql(text(q), engine)
 
 
-@st.cache_data(ttl=300)
+@st.cache_data
 def load_outlet_profile():
     engine = get_engine()
     q = """
@@ -197,7 +197,7 @@ def load_outlet_profile():
     return pd.read_sql(text(q), engine)
 
 
-@st.cache_data(ttl=300)
+@st.cache_data
 def load_revenue_by_category():
     engine = get_engine()
     q = """
@@ -213,7 +213,7 @@ def load_revenue_by_category():
     return pd.read_sql(text(q), engine)
 
 
-@st.cache_data(ttl=300)
+@st.cache_data
 def load_tier_by_outlet():
     engine = get_engine()
     q = """
@@ -755,8 +755,8 @@ El dashboard está construido con **Streamlit** (para la interfaz web)
 y **Plotly** (para los gráficos interactivos).
 
 Algunas decisiones de diseño:
-- Los datos se guardan en memoria por 5 minutos para que el dashboard sea rápido,
-  sin necesidad de consultar la base de datos en cada clic.
+- Los datos se cargan una sola vez al iniciar la app y se mantienen en memoria
+  durante toda la sesión — el dataset es estático y no requiere recargas.
 - Los colores son consistentes en todos los gráficos:
   🟢 Económico · 🟡 Intermedio · 🔴 Premium
 - Cada sección incluye un insight automático calculado desde los datos reales,
