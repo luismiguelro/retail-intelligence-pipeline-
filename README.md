@@ -221,9 +221,3 @@ Blinkit is a rapid-delivery grocery chain in India. The dataset contains catalog
 **Important note:** The downloaded file is the Kaggle competition test set — it does not include `item_outlet_sales`. Rather than sourcing a different dataset, the analysis reframes around a question this data *can* answer well: catalog positioning and shelf strategy. This is a real decision a category manager faces even with complete sales data.
 
 ---
-
-## About This Project
-
-Built as part of a **10-week data engineering portfolio plan** — one end-to-end project every 4 weeks, each with a live deployment and automated pipeline.
-
-**Author:** Luis Miguel Rodríguez — [luismiguelro.com](https://www.luismiguelro.com) · [LinkedIn](https://linkedin.com/in/luismiguelro)
